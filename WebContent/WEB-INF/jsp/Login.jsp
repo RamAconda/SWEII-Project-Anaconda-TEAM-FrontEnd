@@ -18,7 +18,6 @@
 		<h1> Login now</h1>
 		<h2> if you don't have an account you can signup from <a href = "/FCISquareApp/app/signUp">here</a> </h2>
 		</center>
-
 <form action = "doLogin" method = "post" >
 	
 	Email <input type="text" name = "email" /> <br>

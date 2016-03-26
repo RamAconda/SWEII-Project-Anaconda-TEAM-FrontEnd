@@ -1,5 +1,6 @@
 package com.application;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,10 +21,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+
 @Path("/")
 public class UserController {
 
 	@Context
+	//static
 	HttpServletRequest request;
 
 	@GET
@@ -54,7 +57,7 @@ public class UserController {
 		HttpSession session = request.getSession();
 		Long id = (Long) session.getAttribute("id");
 		//String serviceUrl = "http://se2firstapp-softwareeng2.rhcloud.com/FCISquare/rest/updatePosition";
-		String serviceUrl = "http://localhost:8080/FCISquare/rest/login";
+		String serviceUrl = "http://localhost:8080/FCISquare/rest/updatePosition";
 
 		String urlParameters = "id=" + id + "&lat=" + lat + "&long="+ lon;
 		// System.out.println(urlParameters);
@@ -83,16 +86,19 @@ public class UserController {
 	public Response showHomePage(@FormParam("email") String email,
 			@FormParam("pass") String pass) {
 		//String serviceUrl = "http://se2firstapp-softwareeng2.rhcloud.com/FCISquare/rest/login";
+		System.out.println("In do log in function");
 		String serviceUrl = "http://localhost:8080/FCISquare/rest/login";
 
 		String urlParameters = "email=" + email + "&pass=" + pass;
 		// System.out.println(urlParameters);
 		String retJson = Connection.connect(serviceUrl, urlParameters, "POST",
 				"application/x-www-form-urlencoded;charset=UTF-8");
+		System.out.println("back from the server");
 		HttpSession session = request.getSession();
 		JSONObject obj = new JSONObject();
 		JSONParser parser = new JSONParser();
 		try {
+			System.out.println("going to parse the return values");
 			obj = (JSONObject) parser.parse(retJson);
 			session.setAttribute("email", obj.get("email"));
 			session.setAttribute("name", obj.get("name"));
@@ -153,4 +159,32 @@ public class UserController {
 		return null;
 
 	}
+	
+	@POST
+	@Path("/doGetFollowers")
+	@Produces(MediaType.TEXT_HTML)
+	public Response getFollowers(){
+		HttpSession session = request.getSession();
+		String email = (String) session.getAttribute("email");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/followers";
+		System.out.println("email : " + email);
+		String parameters = "email="+email;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		Map<String , ArrayList<String>> map = new HashMap<>();
+		ArrayList<String> list=new ArrayList<>();
+		try {
+			obj = (JSONObject)parser.parse(retJson);
+			for(int i = 0 ; i<obj.size();i++){
+				list.add((String) obj.get("follower #"+(i+1)));
+				System.out.println((String) obj.get("follower #"+(i+1)));
+			}
+			map.put("followers", list);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Response.ok(new Viewable("/getFollowers.jsp", map)).build();
+	}	
 }
