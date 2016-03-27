@@ -21,8 +21,12 @@
 	<p> All parameters are post parameters </p>
 	
 	<p>you should implement Follow,	UnFollow, getFollowers and getLastPositionOfUser services </p>
+	<form action="follow" method="post">
+		<input type="submit" value="follow someone?"/>
+	</form>
 	<form action="doGetFollowers" method="post">
 		<input type="submit" value="Who Follows U ??"/>
 	</form>
+	
 </body>
 </html>

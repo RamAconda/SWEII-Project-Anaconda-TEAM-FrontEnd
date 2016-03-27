@@ -186,5 +186,90 @@ public class UserController {
 			e.printStackTrace();
 		}
 		return Response.ok(new Viewable("/getFollowers.jsp", map)).build();
-	}	
+	}
+	
+	@POST
+	@Path("/follow")
+	@Produces(MediaType.TEXT_HTML)
+	public Response call_follow(){
+		return Response.ok(new Viewable("/follow.jsp")).build();
+	}
+	
+	
+	@POST
+	@Path("/doFollow")
+	@Produces(MediaType.TEXT_HTML)
+	public String follow(@FormParam("tofollow") String tofollow){
+		HttpSession session = request.getSession();
+		String email = (String) session.getAttribute("email");
+		String pass = (String) session.getAttribute("Pass");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/follow";
+		String parameters = "Follower_email="+email+"&pass="+pass+"&Followed_email="+tofollow;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		try {
+			obj = (JSONObject) parser.parse(retJson);
+			Long status = (Long) obj.get("status");
+			if(status == 1)
+				return "now you follow -> "+tofollow;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "there is a problem";
+	}
+	
+	@POST
+	@Path("/unfollow")
+	@Produces(MediaType.TEXT_HTML)
+	public Response call_unfollow(){
+		return Response.ok(new Viewable("/unfollow.jsp")).build();
+	}
+	
+	
+	@POST
+	@Path("/dounFollow")
+	@Produces(MediaType.TEXT_HTML)
+	public String unfollow(@FormParam("tounfollow") String tounfollow){
+		HttpSession session = request.getSession();
+		String email = (String) session.getAttribute("email");
+		String pass = (String) session.getAttribute("Pass");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/unfollow";
+		String parameters = "Follower_email="+email+"&pass="+pass+"&Followed_email="+tounfollow;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		try {
+			obj = (JSONObject) parser.parse(retJson);
+			Long status = (Long) obj.get("status");
+			if(status == 1)
+				return "unfollow is done";
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "there is a problem";
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
