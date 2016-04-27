@@ -42,12 +42,43 @@ public class UserController {
 	public Response signUpPage() {
 		return Response.ok(new Viewable("/Signup.jsp")).build();
 	}
+	@GET
+	@Path("/saveplace")
+	@Produces(MediaType.TEXT_HTML)
+	public Response saveplacesPage() {
+		return Response.ok(new Viewable("/saveplace.jsp")).build();
+	}
+	
+	@GET
+	@Path("/doshowplace")
+	@Produces(MediaType.TEXT_HTML)
+	public Response showplace() {
+		return Response.ok(new Viewable("/showplaces.jsp")).build();
+	}
 	
 	@GET
 	@Path("/showLocation")
 	@Produces(MediaType.TEXT_HTML)
 	public Response showLocationPage(){
 		return Response.ok(new Viewable("/ShowLocation.jsp")).build();
+	}
+	@GET
+	@Path("/addplace")
+	@Produces(MediaType.TEXT_HTML)
+	public Response addplacePage(){
+		return Response.ok(new Viewable("/addplace.jsp")).build();
+	}
+	@GET
+	@Path("/saveplace")
+	@Produces(MediaType.TEXT_HTML)
+	public Response saveplacePage(){
+		return Response.ok(new Viewable("/saveplace.jsp")).build();
+	}
+	@GET
+	@Path("/AddCheckinpag")
+	@Produces(MediaType.TEXT_HTML)
+	public Response checkinPage(){
+		return Response.ok(new Viewable("/addCheckin.jsp")).build();
 	}
 
 	@POST
@@ -57,7 +88,7 @@ public class UserController {
 		HttpSession session = request.getSession();
 		Long id = (Long) session.getAttribute("id");
 		//String serviceUrl = "http://se2firstapp-softwareeng2.rhcloud.com/FCISquare/rest/updatePosition";
-		String serviceUrl = "http://localhost:8080/FCISquare/rest/updatePosition";
+		String serviceUrl = "http://localhost:8080/FCISquare/rest/locationServices/updatePosition";
 
 		String urlParameters = "id=" + id + "&lat=" + lat + "&long="+ lon;
 		// System.out.println(urlParameters);
@@ -87,7 +118,7 @@ public class UserController {
 			@FormParam("pass") String pass) {
 		//String serviceUrl = "http://se2firstapp-softwareeng2.rhcloud.com/FCISquare/rest/login";
 		System.out.println("In do log in function");
-		String serviceUrl = "http://localhost:8080/FCISquare/rest/login";
+		String serviceUrl = "http://localhost:8080/FCISquare/rest/startingServices/login";
 
 		String urlParameters = "email=" + email + "&pass=" + pass;
 		// System.out.println(urlParameters);
@@ -127,7 +158,7 @@ public class UserController {
 	public Response showHomePage(@FormParam("name") String name,
 			@FormParam("email") String email, @FormParam("pass") String pass) {
 		//String serviceUrl = "http://se2firstapp-softwareeng2.rhcloud.com/FCISquare/rest/signup";
-		String serviceUrl = "http://localhost:8080/FCISquare/rest/signup";
+		String serviceUrl = "http://localhost:8080/FCISquare/rest/startingServices/signup";
 
 		String urlParameters = "name=" + name + "&email=" + email + "&pass="
 				+ pass;
@@ -166,7 +197,7 @@ public class UserController {
 	public Response getFollowers(){
 		HttpSession session = request.getSession();
 		String email = (String) session.getAttribute("email");
-		String ServerUrl = "http://localhost:8080/FCISquare/rest/followers";
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/followingServices/followers";
 		System.out.println("email : " + email);
 		String parameters = "email="+email;
 		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
@@ -203,7 +234,7 @@ public class UserController {
 		HttpSession session = request.getSession();
 		String email = (String) session.getAttribute("email");
 		String pass = (String) session.getAttribute("Pass");
-		String ServerUrl = "http://localhost:8080/FCISquare/rest/follow";
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/followingServices/follow";
 		String parameters = "Follower_email="+email+"&pass="+pass+"&Followed_email="+tofollow;
 		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
 				"application/x-www-form-urlencoded;charset=UTF-8");
@@ -236,7 +267,7 @@ public class UserController {
 		HttpSession session = request.getSession();
 		String email = (String) session.getAttribute("email");
 		String pass = (String) session.getAttribute("Pass");
-		String ServerUrl = "http://localhost:8080/FCISquare/rest/unfollow";
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/followingServices/unfollow";
 		String parameters = "Follower_email="+email+"&pass="+pass+"&Followed_email="+tounfollow;
 		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
 				"application/x-www-form-urlencoded;charset=UTF-8");
@@ -253,8 +284,244 @@ public class UserController {
 		}
 		return "there is a problem";
 	}
-}
+	
+	@POST
+	@Path("/AddNewPlace")
+	@Produces(MediaType.TEXT_HTML)
+	public Response showhomePage(@FormParam("name") String name,
+			@FormParam("decription") String decription, @FormParam("lat") double lat, @FormParam("lng") double lng){
+		//String serviceUrl = "http://se2firstapp-softwareeng2.rhcloud.com/FCISquare/rest/signup";
+		String serviceUrl = "http://localhost:8080/FCISquare/rest/PlaceService/addnewplace";
 
+		String urlParameters = "name=" + name + "&decription=" + decription + "&lat="
+				+ lat+"&lng="+lng; 
+		// System.out.println(urlParameters);
+		String retJson = Connection.connect(serviceUrl, urlParameters, "POST",
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		HttpSession session = request.getSession();
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		try {
+			obj = (JSONObject) parser.parse(retJson);
+			
+			session.setAttribute("name", obj.get("name"));
+			session.setAttribute("id", obj.get("id"));
+			session.setAttribute("lat", obj.get("lat"));
+			session.setAttribute("lng", obj.get("lng"));
+			session.setAttribute("decription", obj.get("decription"));
+			Map<String, String> map = new HashMap<String, String>();
+
+			map.put("name", (String) obj.get("name"));
+			map.put("email", (String) obj.get("email"));
+
+			return Response.ok(new Viewable("/home.jsp", map)).build();
+
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	
+	@POST
+	@Path("/SavePlace")
+	@Produces(MediaType.TEXT_HTML)
+	public Response showhomePage(@FormParam("placeid") int id){
+		//String serviceUrl = "http://se2firstapp-softwareeng2.rhcloud.com/FCISquare/rest/signup";
+		String serviceUrl = "http://localhost:8080/FCISquare/rest/PlaceService/SavePlacee";
+		HttpSession session = request.getSession();
+	int userid = (int) session.getAttribute("id");
+		String urlParameters = "&placeid=" + id + "&userid="+userid ;
+		// System.out.println(urlParameters);
+		String retJson = Connection.connect(serviceUrl, urlParameters, "POST",
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		try {
+			obj = (JSONObject) parser.parse(retJson);
+			
+			session.setAttribute("usermail", obj.get("usermail"));
+			session.setAttribute("id", obj.get("id"));
+			Map<String, String> map = new HashMap<String, String>();
+
+			map.put("name", (String) obj.get("name"));
+			map.put("email", (String) obj.get("email"));
+
+			return Response.ok(new Viewable("/home.jsp", map)).build();
+
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	@POST
+	@Path("/ShowPlaces")
+	@Produces(MediaType.TEXT_HTML)
+	public Response getPlaces(){
+		HttpSession session = request.getSession();
+		int id = (int) session.getAttribute("id");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/PlaceService/Showplcaes";
+		//ystem.out.println("email : " + email);
+		String parameters ="userid"+id;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		Map<String , ArrayList<String>> map = new HashMap<>();
+		ArrayList<String> list=new ArrayList<>();
+		try {
+			obj = (JSONObject)parser.parse(retJson);
+			for(int i = 0 ; i<obj.size();i++){
+				list.add((String) obj.get("place #"+(i+1)));
+				System.out.println((String) obj.get("place #"+(i+1)));
+			}
+			map.put("places", list);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Response.ok(new Viewable("/showplaces.jsp", map)).build();
+		}
+	@POST
+	@Path("/GetCheckin")
+	@Produces(MediaType.TEXT_HTML)
+	public Response getCheckin(@FormParam("user_Id") int user_Id){
+		HttpSession session = request.getSession();
+		//String email = (String) session.getAttribute("email");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/followersCheckIns";
+		String parameters = "user_Id="+user_Id;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		Map<String , ArrayList<String>> map = new HashMap<>();
+		ArrayList<String> list=new ArrayList<>();
+		try {
+			obj = (JSONObject)parser.parse(retJson);
+			for(int i = 0 ; i<obj.size();i++){
+				list.add((String) obj.get("checkin#"+(i+1)));
+				System.out.println((String) obj.get("checkin #"+(i+1)));
+			}
+			map.put("checkin", list);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Response.ok(new Viewable("/checkin.jsp", map)).build();
+	}
+	@POST
+	@Path("/ShowCheckin")
+	@Produces(MediaType.TEXT_HTML)
+	public Response showCheckin(@FormParam("checkin_Id") int checkin_Id){
+		HttpSession session = request.getSession();
+		try {
+			
+		
+			session.setAttribute("checkin", checkin_Id);
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+			
+		//String email = (String) session.getAttribute("email");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/followersCheckIns";
+		String parameters = "checkin_Id="+checkin_Id;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		Map<String , ArrayList<String>> map = new HashMap<>();
+		ArrayList<String> list=new ArrayList<>();
+		try {
+			obj = (JSONObject)parser.parse(retJson);
+			for(int i = 0 ; i<obj.size();i++){
+				list.add((String) obj.get("checkin#"+(i+1)));
+				System.out.println((String) obj.get("checkin #"+(i+1)));
+			}
+			map.put("checkin", list);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Response.ok(new Viewable("/showcheckin.jsp", map)).build();
+	}
+
+	@POST
+	@Path("/doComment")
+	@Produces(MediaType.TEXT_HTML)
+	public String comment(@FormParam("Comment") String Comment){
+		HttpSession session = request.getSession();
+		int userid= (Integer) session.getAttribute("id");
+		int checkinid= (Integer) session.getAttribute("checkin");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/comment";
+		String parameters = "userid="+userid+"&checkinid="+checkinid+"&comment="+Comment;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+//		JSONObject obj = new JSONObject();
+//		JSONParser parser = new JSONParser();
+//		try {
+//			obj = (JSONObject) parser.parse(retJson);
+//			Long status = (Long) obj.get("status");
+//			if(status == 1)
+//				return "successful comment";
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return "there is a problem";
+		return "successful comment";
+	}
+	@POST
+	@Path("/doComment")
+	@Produces(MediaType.TEXT_HTML)
+	public String comment(){
+		HttpSession session = request.getSession();
+		int userid= (Integer) session.getAttribute("id");
+		int checkinid= (Integer) session.getAttribute("checkin");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/like";
+		String parameters = "userid="+userid+"&checkinid="+checkinid;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+//		JSONObject obj = new JSONObject();
+//		JSONParser parser = new JSONParser();
+//		try {
+//			obj = (JSONObject) parser.parse(retJson);
+//			Long status = (Long) obj.get("status");
+//			if(status == 1)
+//				return "successful comment";
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return "there is a problem";
+		return "successful Like";
+	}
+	@POST
+	@Path("/addCheckin")
+	@Produces(MediaType.TEXT_HTML)
+	public String follow(@FormParam("Placeid") int place_id,@FormParam("description") String description){
+		HttpSession session = request.getSession();
+		int userid  = (Integer) session.getAttribute("id");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/checkIn";
+		String parameters = "userId="+userid+"&placeId="+place_id+"&description="+description;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		try {
+			obj = (JSONObject) parser.parse(retJson);
+			
+			
+				return  "successful checkin";
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "there is a problem";
+	}
+	
+
+}
 
 
 

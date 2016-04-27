@@ -22,11 +22,25 @@
 	
 	<p>you should implement Follow,	UnFollow, getFollowers and getLastPositionOfUser services </p>
 	<form action="follow" method="post">
-		<input type="submit" value="follow someone?"/>
+		<input type="submit" value="Follow"/>
+	</form>
+    <form action="unfollow" method="post">
+		<input type="submit" value="UnFollow"/>
 	</form>
 	<form action="doGetFollowers" method="post">
-		<input type="submit" value="Who Follows U ??"/>
-	</form>
-	
+		<input type="submit" value="Followed"/>
+	</form> 
+    </form>
+	<form action="AddCheckinpage" method="get">
+		<input type="submit" value="Checkin"/>
+	</form> 
+    <form action="addplace" method="get">
+		<input type="submit" value="Add Place"/>
+	</form> 
+        <form action="saveplace" method="get">
+		<input type="submit" value="Save Place"/>
+	</form> 
+    
+    
 </body>
 </html>
