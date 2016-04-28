@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<form action = "doSignUp" method = "post">
+<form action = "/FCISquare/app/doSignUp" method = "post">
 	
 	name : <input type = "text" name = "name" /> <br>
 	email : <input type = "text" name = "email" /> <br>

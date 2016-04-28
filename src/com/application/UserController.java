@@ -53,6 +53,28 @@ public class UserController {
 	@Path("/doshowplace")
 	@Produces(MediaType.TEXT_HTML)
 	public Response showplace() {
+		HttpSession session = request.getSession();
+		int id = (int) session.getAttribute("id");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/PlaceService/Showplcaes";
+		//ystem.out.println("email : " + email);
+		String parameters ="userid"+id;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		Map<String , ArrayList<String>> map = new HashMap<>();
+		ArrayList<String> list=new ArrayList<>();
+		try {
+			obj = (JSONObject)parser.parse(retJson);
+			for(int i = 0 ; i<obj.size();i++){
+				list.add((String) obj.get("place #"+(i+1)));
+				System.out.println((String) obj.get("place #"+(i+1)));
+			}
+			map.put("places", list);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
 		return Response.ok(new Viewable("/showplaces.jsp")).build();
 	}
 	
@@ -68,12 +90,7 @@ public class UserController {
 	public Response addplacePage(){
 		return Response.ok(new Viewable("/addplace.jsp")).build();
 	}
-	@GET
-	@Path("/saveplace")
-	@Produces(MediaType.TEXT_HTML)
-	public Response saveplacePage(){
-		return Response.ok(new Viewable("/saveplace.jsp")).build();
-	}
+	
 	@GET
 	@Path("/AddCheckinpag")
 	@Produces(MediaType.TEXT_HTML)
@@ -141,8 +158,48 @@ public class UserController {
 
 			map.put("name", (String) obj.get("name"));
 			map.put("email", (String) obj.get("email"));
+			//HttpSession session = request.getSession();
+			int userid= (Integer) session.getAttribute("id");
+			String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/followersCheckIns";
+			//System.out.println("useris: " + userid);
+			String parameters = "userid="+userid;
+			String retJson1 = Connection.connect(ServerUrl, parameters, "POST", 
+					"application/x-www-form-urlencoded;charset=UTF-8");
+			JSONObject obj1 = new JSONObject();
+			JSONParser parser1 = new JSONParser();
+			Map<String , ArrayList<String>> map1 = new HashMap<>();
+			ArrayList<String> list1=new ArrayList<>();
+			try {
+				obj1 = (JSONObject)parser.parse(retJson1);
+				for(int i = 0 ; i<obj1.size();i++){
+					list1.add((String) obj1.get("followercheck #"+(i+1)));
+					System.out.println((String) obj1.get("followercheckin#"+(i+1)));
+				}
+				map1.put("followercheckin", list1);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			String ServerUrl2 = "http://localhost:8080/FCISquare/rest/checkInServices/myCheckIns";
+			//System.out.println("useris: " + userid);
+				parameters = "userid="+userid;
+			String retJson2 = Connection.connect(ServerUrl2, parameters, "POST", 
+					"application/x-www-form-urlencoded;charset=UTF-8");
+			JSONObject obj2 = new JSONObject();
+			JSONParser parser2 = new JSONParser();
+			Map<String , ArrayList<String>> map2 = new HashMap<>();
+			ArrayList<String> list2=new ArrayList<>();
+			try {
+				obj = (JSONObject)parser.parse(retJson1);
+				for(int i = 0 ; i<obj2.size();i++){
+					list2.add((String) obj2.get("mycheckin #"+(i+1)));
+					System.out.println((String) obj2.get("mycheckin#"+(i+1)));
+				}
+				map2.put("mycheckin", list2);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
 
-			return Response.ok(new Viewable("/home.jsp", map)).build();
+			return Response.ok(new Viewable("/home.jsp", map2)).build();
 
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -180,6 +237,8 @@ public class UserController {
 
 			map.put("name", (String) obj.get("name"));
 			map.put("email", (String) obj.get("email"));
+			
+			
 
 			return Response.ok(new Viewable("/home.jsp", map)).build();
 
@@ -331,7 +390,8 @@ public class UserController {
 		//String serviceUrl = "http://se2firstapp-softwareeng2.rhcloud.com/FCISquare/rest/signup";
 		String serviceUrl = "http://localhost:8080/FCISquare/rest/PlaceService/SavePlacee";
 		HttpSession session = request.getSession();
-	int userid = (int) session.getAttribute("id");
+		
+	Integer userid =(Integer) session.getAttribute("id");
 		String urlParameters = "&placeid=" + id + "&userid="+userid ;
 		// System.out.println(urlParameters);
 		String retJson = Connection.connect(serviceUrl, urlParameters, "POST",
@@ -449,13 +509,13 @@ public class UserController {
 	@POST
 	@Path("/doComment")
 	@Produces(MediaType.TEXT_HTML)
-	public String comment(@FormParam("Comment") String Comment){
+	public String comment(@FormParam("Comment") String Comment,@FormParam("checkinid") int checkinid){
 		HttpSession session = request.getSession();
 		int userid= (Integer) session.getAttribute("id");
-		int checkinid= (Integer) session.getAttribute("checkin");
+	//	int checkinid= (Integer) session.getAttribute("checkin");
 		String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/comment";
 		String parameters = "userid="+userid+"&checkinid="+checkinid+"&comment="+Comment;
-		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+		 Connection.connect(ServerUrl, parameters, "POST", 
 				"application/x-www-form-urlencoded;charset=UTF-8");
 //		JSONObject obj = new JSONObject();
 //		JSONParser parser = new JSONParser();
@@ -472,15 +532,15 @@ public class UserController {
 		return "successful comment";
 	}
 	@POST
-	@Path("/doComment")
+	@Path("/doLike")
 	@Produces(MediaType.TEXT_HTML)
-	public String comment(){
+	public String Like(@FormParam("checkinid") int checkinid){
 		HttpSession session = request.getSession();
 		int userid= (Integer) session.getAttribute("id");
-		int checkinid= (Integer) session.getAttribute("checkin");
+		//int checkinid= (Integer) session.getAttribute("checkin");
 		String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/like";
 		String parameters = "userid="+userid+"&checkinid="+checkinid;
-		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+		 Connection.connect(ServerUrl, parameters, "POST", 
 				"application/x-www-form-urlencoded;charset=UTF-8");
 //		JSONObject obj = new JSONObject();
 //		JSONParser parser = new JSONParser();
@@ -518,6 +578,52 @@ public class UserController {
 			e.printStackTrace();
 		}
 		return "there is a problem";
+	}
+	@POST
+	@Path("/HomePage")
+	@Produces(MediaType.TEXT_HTML)
+	public Response Home(){
+		HttpSession session = request.getSession();
+		Integer userid= (Integer) session.getAttribute("id");
+		String ServerUrl = "http://localhost:8080/FCISquare/rest/checkInServices/followersCheckIns";
+		//System.out.println("useris: " + userid);
+		String parameters = "userid="+userid;
+		String retJson = Connection.connect(ServerUrl, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj = new JSONObject();
+		JSONParser parser = new JSONParser();
+		Map<String , ArrayList<String>> map = new HashMap<>();
+		ArrayList<String> list=new ArrayList<>();
+		try {
+			obj = (JSONObject)parser.parse(retJson);
+			for(int i = 0 ; i<obj.size();i++){
+				list.add((String) obj.get("followercheck #"+(i+1)));
+				System.out.println((String) obj.get("followercheckin#"+(i+1)));
+			}
+			map.put("followercheckin", list);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		String ServerUrl2 = "http://localhost:8080/FCISquare/rest/checkInServices/myCheckIns";
+		//System.out.println("useris: " + userid);
+			parameters = "userid="+userid;
+		String retJson1 = Connection.connect(ServerUrl2, parameters, "POST", 
+				"application/x-www-form-urlencoded;charset=UTF-8");
+		JSONObject obj2 = new JSONObject();
+		JSONParser parser2 = new JSONParser();
+		Map<String , ArrayList<String>> map2 = new HashMap<>();
+		ArrayList<String> list2=new ArrayList<>();
+		try {
+			obj = (JSONObject)parser.parse(retJson1);
+			for(int i = 0 ; i<obj2.size();i++){
+				list2.add((String) obj2.get("mycheckin #"+(i+1)));
+				System.out.println((String) obj2.get("mycheckin#"+(i+1)));
+			}
+			map2.put("mycheckin", list2);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Response.ok(new Viewable("/home.jsp", map)).build();
 	}
 	
 
